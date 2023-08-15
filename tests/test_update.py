@@ -77,6 +77,18 @@ class TestUpdate(test.TestCase):
         self.assertEqual((await JSONFields.get(pk=objs[0].pk)).data, objs[0].data)
         self.assertEqual((await JSONFields.get(pk=objs[1].pk)).data, objs[1].data)
 
+    async def test_bulk_update_json_value_non_ascii_string(self):
+        objs = [
+            await JSONFields.create(data={}),
+            await JSONFields.create(data={}),
+        ]
+        objs[0].data = ["你好", "世界"]
+        objs[1].data = {"标题": "测试"}
+        rows_affected = await JSONFields.bulk_update(objs, fields=["data"])
+        self.assertEqual(rows_affected, 2)
+        self.assertEqual((await JSONFields.get(pk=objs[0].pk)).data, objs[0].data)
+        self.assertEqual((await JSONFields.get(pk=objs[1].pk)).data, objs[1].data)
+
     @test.requireCapability(dialect=NotEQ("mssql"))
     async def test_bulk_update_smallint_none(self):
         objs = [
